@@ -6,9 +6,11 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 )
 
 type UrlsCreator struct {
+	wg       sync.WaitGroup
 	urlsChan chan string
 	config   Config
 }
@@ -17,25 +19,42 @@ func New(config Config) *UrlsCreator {
 	return &UrlsCreator{urlsChan: make(chan string), config: config}
 }
 
-func (c UrlsCreator) Start() chan string {
-	domains, err := processDomains(c.config.DomainsFile)
-	if err != nil {
-		fmt.Printf("read domains fail %s", err)
-	}
-	subDomains, err := processDomains(c.config.SubDomainsFile)
-	if err != nil {
-		fmt.Printf("read subDomains fail %s", err)
-	}
-	links, err := processDomains(c.config.LinksFile)
-	if err != nil {
-		fmt.Printf("read links fail %s", err)
-	}
+func (c *UrlsCreator) Start() chan string {
+	var err error
+	var domains, subDomains, links []string
+	c.wg.Add(1)
+	go func() {
+		domains, err = processDomains(c.config.DomainsFile)
+		if err != nil {
+			fmt.Printf("read domains fail %s", err)
+		}
+		c.wg.Done()
+	}()
+	c.wg.Add(1)
+	go func() {
+		subDomains, err = processDomains(c.config.SubDomainsFile)
+		if err != nil {
+			fmt.Printf("read subDomains fail %s", err)
+		}
+		c.wg.Done()
+	}()
+	c.wg.Add(1)
+	go func() {
+		links, err = processDomains(c.config.LinksFile)
+		if err != nil {
+			fmt.Printf("read links fail %s", err)
+		}
+		c.wg.Done()
+	}()
+
+	c.wg.Wait()
+
 	go c.run(domains, subDomains, links)
 
 	return c.urlsChan
 }
 
-func (c UrlsCreator) run(domains, subDomains, links []string) {
+func (c *UrlsCreator) run(domains, subDomains, links []string) {
 	defer close(c.urlsChan)
 
 	for _, domain := range domains {

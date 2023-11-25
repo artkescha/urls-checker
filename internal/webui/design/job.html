@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Тестовая страница</title>
+    <link rel="stylesheet" href="../static/index.css">
+  </head>
+  <body>
+    <main>
+      <h1>Статус выполнения задания</h1>
+      <section class="settings">
+        <h2>Загрузка файлов</h2>
+        <form enctype="multipart/form-data" action="/upload/domains" method="post">
+          <h3>Файл доменов</h3>
+          <p>
+            <input type="file" name="domains" id="domains" />
+            <button type="submit">Загрузить</button>
+          </p>
+          <p>
+            Файл загружен, %d байтов, %d строк
+            <a href="/download/domains">Скачать</a>
+          </p>
+        </form>
+        <form enctype="multipart/form-data" action="/upload/subdomains" method="post">
+          <h3>Файл сабдоменнов</h3>
+          <p>
+            <input type="file" name="subdomains" id="subdomains" />
+            <button type="submit">Загрузить</button>
+          </p>
+          <p>
+            Файл загружен, %d байтов, %d строк
+            <a href="/download/subdomains">Скачать</a>
+          </p>
+        </form>
+        <form enctype="multipart/form-data" action="/upload/links" method="post">
+          <h3>Файл путей</h3>
+          <p>
+            <input type="file" name="links" id="links" />
+            <button type="submit">Загрузить</button>
+          </p>
+          <p>
+            Файл загружен, %d байтов, %d строк
+            <a href="/download/links">Скачать</a>
+          </p>
+        </form>
+      </section>
+      <section class="settings">
+        <h2>Параметры задания</h2>
+        <form  action="/job" method="post">
+          <h3>Данные</h3>
+          <p><label for="skiplines">Пропустить доменов с начала</label></p>
+          <p><input type="text" name="skiplines" id="skiplines" value="{{.skiplines}}" /></p>
+          <p><input type="checkbox" name="appendres" id="appendres" value="1" {{if .appendres}}checked{{end}} /> <label for="appendres">Дополнить файл результата</label></p>
+          <p><button type="submit">Запустить</button></p>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

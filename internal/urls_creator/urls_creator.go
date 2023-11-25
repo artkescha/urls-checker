@@ -3,8 +3,9 @@ package urls_creator
 import (
 	"bufio"
 	"fmt"
+	"net/url"
 	"os"
-	"path/filepath"
+	"strings"
 )
 
 type UrlsCreator struct {
@@ -17,15 +18,15 @@ func New(config Config) *UrlsCreator {
 }
 
 func (c UrlsCreator) Start() chan string {
-	domains, err := processDomains(c.config.domainsFile)
+	domains, err := processDomains(c.config.DomainsFile)
 	if err != nil {
 		fmt.Printf("read domains fail %s", err)
 	}
-	subDomains, err := processDomains(c.config.subDomainsFile)
+	subDomains, err := processDomains(c.config.SubDomainsFile)
 	if err != nil {
 		fmt.Printf("read subDomains fail %s", err)
 	}
-	links, err := processDomains(c.config.linksFile)
+	links, err := processDomains(c.config.LinksFile)
 	if err != nil {
 		fmt.Printf("read links fail %s", err)
 	}
@@ -40,7 +41,13 @@ func (c UrlsCreator) run(domains, subDomains, links []string) {
 	for _, domain := range domains {
 		for _, subDomain := range subDomains {
 			for _, link := range links {
-				c.urlsChan <- filepath.Join(domain, subDomain, link)
+
+				subDomain = strings.Trim(subDomain, ".")
+				url_, _ := url.JoinPath(domain, link)
+				url_ = subDomain + "." + url_
+
+				fmt.Printf("%s\n", url_)
+				c.urlsChan <- url_
 			}
 		}
 	}

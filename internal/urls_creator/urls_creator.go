@@ -22,6 +22,7 @@ func New(config Config) *UrlsCreator {
 func (c *UrlsCreator) Start() chan string {
 	var err error
 	var domains, subDomains, links []string
+
 	c.wg.Add(1)
 	go func() {
 		domains, err = processDomains(c.config.DomainsFile)
